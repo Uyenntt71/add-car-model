@@ -4,7 +4,6 @@ from os import listdir
 from os.path import isfile, join
 import requests
 import logging
-import pandas as pd
 import csv
 
 
@@ -68,9 +67,10 @@ def download_image(model, color , url):
 
 # Getting the current work directory (cwd)
 # thisdir = os.getcwd()
-thisdir = "./input_images"
+input_img_dir = "./input_images"
+output_img_dir = "./output_images"
 # r=root, d=directories, f = files
-for r, d, f in os.walk(thisdir):
+for r, d, f in os.walk(input_img_dir):
     count = 1
     for file in f:
         # if (file.endswith(".png") or file.endswith(".jpg")  or file.endswith(".jpeg")):
@@ -82,13 +82,17 @@ for r, d, f in os.walk(thisdir):
             print(file)
             print("width={}, height={}, depth={}".format(w, h, d))
             count = count + 1
-            r = 150 / w 
             
             #resize img
-            dim = (150, int(h * r))
+            ratio = 150 / w 
+            dim = (150, int(h * ratio))
             resized = cv2.resize(img, dim)
-            
+            (h1, w1, d1) = resized.shape
+            print("width={}, height={}, depth={}".format(w1, h1, d1))
+            # print(os.path.join(output_img_dir, file).replace(" ", "\\ "))
+            cv2.imwrite(os.path.join(output_img_dir, file) + ".png", resized)
             
         except Exception as e:
             logging.warning('error read file ' + file)
+            print(e)
             
