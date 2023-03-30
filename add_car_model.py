@@ -31,17 +31,13 @@ import csv
 
 #download img from url
 def download_image(model, color , url):
-    filename = 'input_images/' + model + "_" + color
+    filename = 'input_images/' + model + "_" + color + ".jpg"
     # + url[url.rindex('/'):]
+    print(url)
+    print(filename)
     with open(filename, 'wb') as handle:
         try:
-            response = requests.get(url, stream=true, timeout=10)
-        except requests.exceptions.ConnectTimeout as e:
-            logging.error("Time out!")
-        finally:
-            # continue request here
-        # response = requests.get(url, stream=True)
-
+            response = requests.get(url, stream=True, timeout=10)
             if not response.ok:
                 print(response)
 
@@ -50,68 +46,75 @@ def download_image(model, color , url):
                     break
 
                 handle.write(block)
+        except requests.exceptions.ConnectTimeout as e:
+            logging.error("Time out!")
+        # finally:
+            # continue request here
+        # response = requests.get(url, stream=True)
 
-#download image from url list
-# filename = "Crawl_xe.csv"
-# with open(filename, "r") as csvfile:
-#     csvreader = csv.reader(csvfile)
+            
 
-#     next(csvreader)
+# download image from url list
+filename = "Crawl_xe.csv"
+with open(filename, "r") as csvfile:
+    csvreader = csv.reader(csvfile)
 
-#     for row in csvreader:
-#         color = row[4]
-#         model = row[3]
-#         image = row[5]
+    next(csvreader)
 
-#         download_image(model=model, color=color, url=image)
+    for row in csvreader:
+        color = row[4]
+        model = row[3]
+        image = row[5]
+
+        download_image(model=model, color=color, url=image)
 
 # Getting the current work directory (cwd)
 # thisdir = os.getcwd()
-input_img_dir = "./input_images"
-output_img_dir = "./output_images"
-# r=root, d=directories, f = files
-for r, d, f in os.walk(input_img_dir):
-    count = 1
-    for file in f:
-        # if (file.endswith(".png") or file.endswith(".jpg")  or file.endswith(".jpeg")):
-        # print(os.path.join(r, file))
-        try:
-            img = cv2.imread(os.path.join(r, file))
-            (h, w, d) = img.shape
-            print(count)
-            print(file)
-            print("width={}, height={}, depth={}".format(w, h, d))
-            count = count + 1
+# input_img_dir = "./input_images"
+# output_img_dir = "./output_images"
+# # r=root, d=directories, f = files
+# for r, d, f in os.walk(input_img_dir):
+#     count = 1
+#     for file in f:
+#         # if (file.endswith(".png") or file.endswith(".jpg")  or file.endswith(".jpeg")):
+#         # print(os.path.join(r, file))
+#         try:
+#             img = cv2.imread(os.path.join(r, file))
+#             (h, w, d) = img.shape
+#             print(count)
+#             print(file)
+#             print("width={}, height={}, depth={}".format(w, h, d))
+#             count = count + 1
             
-            #crop img
-            imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            ret, thresh = cv2.threshold(imgray, 1, 255, 0)
-            contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            for c in contours:
-                rect = cv2.boundingRect(c)
-                if rect[2] < 100 or rect[3] < 100:
-                    continue
-                else:
-                    break
-            x, y, w, h = rect
+#             #crop img
+#             imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+#             ret, thresh = cv2.threshold(imgray, 1, 255, 0)
+#             contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+#             for c in contours:
+#                 rect = cv2.boundingRect(c)
+#                 if rect[2] < 100 or rect[3] < 100:
+#                     continue
+#                 else:
+#                     break
+#             x, y, w, h = rect
 
-            cv2.rectangle(img, (rect[0], rect[1]),  (rect[0] + rect[2], rect[1] + rect[3]),  (0,255,0), 3)
-            img = img[y:y+h, x:x+w]
-            # (h, w, d) = img.shape
-            # print("width={}, height={}, depth={}".format(w, h, d))
+#             cv2.rectangle(img, (rect[0], rect[1]),  (rect[0] + rect[2], rect[1] + rect[3]),  (0,255,0), 3)
+#             img = img[y:y+h, x:x+w]
+#             # (h, w, d) = img.shape
+#             # print("width={}, height={}, depth={}".format(w, h, d))
  
             
             
-            #resize img
-            ratio = 0.5 
-            dim = (int(w * ratio), int(h * ratio))
-            resized = cv2.resize(img, dim)
-            (h1, w1, d1) = resized.shape
-            print("width={}, height={}, depth={}".format(w1, h1, d1))
-            # print(os.path.join(output_img_dir, file).replace(" ", "\\ "))
-            cv2.imwrite(os.path.join(output_img_dir, file) + ".png", resized)
+#             #resize img
+#             ratio = 0.5 
+#             dim = (int(w * ratio), int(h * ratio))
+#             resized = cv2.resize(img, dim)
+#             (h1, w1, d1) = resized.shape
+#             print("width={}, height={}, depth={}".format(w1, h1, d1))
+#             # print(os.path.join(output_img_dir, file).replace(" ", "\\ "))
+#             cv2.imwrite(os.path.join(output_img_dir, file) + ".png", resized)
             
-        except Exception as e:
-            logging.warning('error read file ' + file)
-            print(e)
+#         except Exception as e:
+#             logging.warning('error read file ' + file)
+#             print(e)
             
