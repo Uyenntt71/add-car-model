@@ -7,3 +7,4 @@ input_images_old/
 database.ini
 
 __pycache__/
+*.png

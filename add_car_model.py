@@ -1,13 +1,8 @@
+import csv
+import insert_database as isdb
 import cv2
 import os
-from os import listdir
-from os.path import isfile, join
-import requests
-import logging
-import csv
-
-
-
+import psycopg2
 
 # print(cv2.__version__)
 
@@ -27,94 +22,58 @@ import csv
 # (h, w, d) = resized.shape
 # print("width={}, height={}, depth={}".format(w, h, d))
 
+     
 
-
-#download img from url
-def download_image(model, color , url):
-    filename = 'input_images/' + model + "_" + color + ".jpg"
-    # + url[url.rindex('/'):]
-    print(url)
-    print(filename)
-    with open(filename, 'wb') as handle:
-        try:
-            response = requests.get(url, stream=True, timeout=10)
-            if not response.ok:
-                print(response)
-
-            for block in response.iter_content(1024):
-                if not block:
-                    break
-
-                handle.write(block)
-        except requests.exceptions.ConnectTimeout as e:
-            logging.error("Time out!")
-        # finally:
-            # continue request here
-        # response = requests.get(url, stream=True)
-
-            
-
-# download image from url list
-filename = "Crawl_xe.csv"
+# insert img into database
+filename = "Crawl_xe_dev.csv"
+car_image_dir = './car_images_resized_png/'
+car_thumbnail_dir = './car_thumbnail_png/' 
 with open(filename, "r") as csvfile:
     csvreader = csv.reader(csvfile)
 
     next(csvreader)
+    row = next(csvreader)
+    
+    # for row in csvreader:
+    manufacturer_id = row[0]
+    model_id = row[2]
+    color = row[4]
+    model = row[3]
+    image_url = row[5]
+    fuel_capacity = row[6]
+    
+    filename = car_image_dir + model + "_" + color + ".png"
+    car_image = cv2.imread(filename)
+    _, buffer = cv2.imencode(".png", car_image)
+    image_data = buffer.tobytes()
+    # print(car_img_bytes)
+    
+    filename_thumbnail = car_thumbnail_dir + model + "_" + color + ".png"
+    car_thumnail = cv2.imread(filename_thumbnail)
+    _, buffer_thumb = cv2.imencode(".png", car_thumnail)
+    thumb_data = buffer_thumb.tobytes()
+    print(model_id)    
+    #insert new model and model color
+    if (model_id == ''):
+        new_model_id = isdb.insert_model(manufacturer_id=manufacturer_id, model=model, fuel_capacity=fuel_capacity)
+        print(new_model_id)
+        
+        # with open(filename, 'rb') as f:
+        #     car_image = f.read()
+        #     car_img_bytes = psycopg2.Binary(car_image)
+        #     with open(filename_thumbnail, 'rb') as ft:
+        #         car_thumnail = ft.read()
+        #         car_thumb_bytes = psycopg2.Binary(car_image)
+        #         print(str(color) + " " + str(new_model_id) + " " + str(image_url) + " " + str(manufacturer_id) + " " + str(model + " " + color))
+        #         model_color_id = isdb.insert_model_color(color, new_model_id, car_img_bytes, image_url,manufacturer_id, model + " " + color, car_thumb_bytes)
+        #         print(model_color_id)
+                
+        print(str(color) + " " + str(new_model_id) + " " + str(image_url) + " " + str(manufacturer_id) + " " + str(model + " " + color))
+        model_color_id = isdb.insert_model_color(color, new_model_id, psycopg2.Binary(image_data), image_url,manufacturer_id, model + " " + color, psycopg2.Binary(thumb_data))
+        print(model_color_id)
+    #insert only model color
+    else:
+        print(str(color) + " " + str(model_id) + " " + str(image_url) + " " + str(manufacturer_id) + " " + str(model + " " + color))
+        model_color_id = isdb.insert_model_color(color, model_id, psycopg2.Binary(image_data), image_url,manufacturer_id, model + " " + color, psycopg2.Binary(thumb_data))
+        print(model_color_id)
 
-    for row in csvreader:
-        color = row[4]
-        model = row[3]
-        image = row[5]
-
-        download_image(model=model, color=color, url=image)
-
-# Getting the current work directory (cwd)
-# thisdir = os.getcwd()
-# input_img_dir = "./input_images"
-# output_img_dir = "./output_images"
-# # r=root, d=directories, f = files
-# for r, d, f in os.walk(input_img_dir):
-#     count = 1
-#     for file in f:
-#         # if (file.endswith(".png") or file.endswith(".jpg")  or file.endswith(".jpeg")):
-#         # print(os.path.join(r, file))
-#         try:
-#             img = cv2.imread(os.path.join(r, file))
-#             (h, w, d) = img.shape
-#             print(count)
-#             print(file)
-#             print("width={}, height={}, depth={}".format(w, h, d))
-#             count = count + 1
-            
-#             #crop img
-#             imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#             ret, thresh = cv2.threshold(imgray, 1, 255, 0)
-#             contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-#             for c in contours:
-#                 rect = cv2.boundingRect(c)
-#                 if rect[2] < 100 or rect[3] < 100:
-#                     continue
-#                 else:
-#                     break
-#             x, y, w, h = rect
-
-#             cv2.rectangle(img, (rect[0], rect[1]),  (rect[0] + rect[2], rect[1] + rect[3]),  (0,255,0), 3)
-#             img = img[y:y+h, x:x+w]
-#             # (h, w, d) = img.shape
-#             # print("width={}, height={}, depth={}".format(w, h, d))
- 
-            
-            
-#             #resize img
-#             ratio = 0.5 
-#             dim = (int(w * ratio), int(h * ratio))
-#             resized = cv2.resize(img, dim)
-#             (h1, w1, d1) = resized.shape
-#             print("width={}, height={}, depth={}".format(w1, h1, d1))
-#             # print(os.path.join(output_img_dir, file).replace(" ", "\\ "))
-#             cv2.imwrite(os.path.join(output_img_dir, file) + ".png", resized)
-            
-#         except Exception as e:
-#             logging.warning('error read file ' + file)
-#             print(e)
-            

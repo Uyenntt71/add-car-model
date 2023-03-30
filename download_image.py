@@ -4,7 +4,8 @@ import csv
 
 
 def download_image(model, color , url):
-    filename = 'input_images_png/' + model + "_" + color + ".png"
+    
+    filename = 'input_images/' + model + "_" + color + ".png"
     # + url[url.rindex('/'):]
     print(url)
     print(filename)
@@ -22,7 +23,7 @@ def download_image(model, color , url):
         except requests.exceptions.ConnectTimeout as e:
             logging.error("Time out!")
             
-filename = "Crawl_xe.csv"
+filename = "Crawl_xe_dev.csv"
 with open(filename, "r") as csvfile:
     csvreader = csv.reader(csvfile)
 

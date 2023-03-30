@@ -40,7 +40,6 @@ def insert_model(manufacturer_id, model, fuel_capacity):
             RETURNING id
             ;""" 
             # % {"manufacturer_id": manufacturer_id, "model": model, "fuel_capacity":fuel_capacity}
-    print(sql)
     conn = None
     model_id = None
     try:
@@ -69,12 +68,13 @@ def insert_model(manufacturer_id, model, fuel_capacity):
 def insert_model_color(color, model_id, photo_bin, photo, manufacturer_id, name, photo_thumbnail):
     """ insert a new model into the model table """
     sql = """INSERT INTO model_color (color, model_id, photo_bin, photo, manufacturer_id, name, photo_thumbnail) 
-            VALUES ('%(color)s', %(model_id)d, %(photo_bin)d, '%(photo)s', %(manufacturer_id)d, '%(name)s', %(photo_thumbnail)d)
-            ON CONFLICT DO NOTHING
-            ;"""  % {"color": color, "model_id": model_id, "photo_bin":photo_bin, "photo":photo, "manufacturer_id":manufacturer_id, "name":name, "photo_thumbnail":photo_thumbnail }
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            ;"""  
+            # % {"color": color, "model_id": model_id, "photo_bin":photo_bin, "photo":photo, "manufacturer_id":manufacturer_id, "name":name, "photo_thumbnail":photo_thumbnail }
     print(sql)
     conn = None
-    model_id = None
+    model_color_id = None
     try:
         # read database configuration
         params = config()
@@ -83,9 +83,9 @@ def insert_model_color(color, model_id, photo_bin, photo, manufacturer_id, name,
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql)
+        cur.execute(sql, (str(color), model_id, photo_bin, str(photo), manufacturer_id, str(name), photo_thumbnail))
         # get the generated id back
-        model_id = cur.fetchone()[0]
+        model_color_id = cur.fetchone()[0]
         # commit the changes to the database
         conn.commit()
         # close communication with the database
@@ -95,8 +95,9 @@ def insert_model_color(color, model_id, photo_bin, photo, manufacturer_id, name,
     finally:
         if conn is not None:
             conn.close()
-    print(model_id)
-    return model_id
+    print(model_color_id)
+    return model_color_id
 
-if __name__ == '__main__':
-    insert_model(15, 'Mitsubishi Zinger 1', 65)
+# if __name__ == '__main__':
+#     insert_model(15, 'Mitsubishi Zinger 1', 65)
+
