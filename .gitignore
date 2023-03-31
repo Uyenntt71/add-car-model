@@ -1,0 +1,9 @@
+output_images_jpg/
+car_images_png/
+
+input_images/
+input_images_old/
+database.ini
+
+__pycache__/
+*.png
