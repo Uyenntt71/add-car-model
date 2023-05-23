@@ -25,6 +25,7 @@ import psycopg2
 
      
 def insert_new_model_color(in_file, out_file, car_image_dir, car_thumbnail_dir):
+    #insert model color listed in in_file
     with open(in_file, "r") as input, open(out_file, "w") as output:
         csvreader = csv.reader(input)
         csvwriter = csv.writer(output)
