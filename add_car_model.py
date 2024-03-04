@@ -39,13 +39,13 @@ def insert_new_model_color(in_file, out_file, car_image_dir, car_thumbnail_dir):
             image_url = row[5]
             fuel_capacity = row[6]
 
-            filename = car_image_dir + model + "_" + color + ".png"
+            filename = car_image_dir + model + " " + color + ".png"
             car_image = cv2.imread(filename)
             _, buffer = cv2.imencode(".png", car_image)
             image_data = buffer.tobytes()
             print(filename)
 
-            filename_thumbnail = car_thumbnail_dir + model + "_" + color + ".png"
+            filename_thumbnail = car_thumbnail_dir + model + " " + color + " Thumbnail.png"
             car_thumnail = cv2.imread(filename_thumbnail)
             _, buffer_thumb = cv2.imencode(".png", car_thumnail)
             thumb_data = buffer_thumb.tobytes()
@@ -104,9 +104,41 @@ def update_model_color(resized_img_dir, thumbnail_dir, out_file):
                     print(e)
                     csvwriter.writerow([file,'', 'Fail']) 
 
-   
+def print_model_color(in_file, out_file, car_image_dir, car_thumbnail_dir):
+    with open(in_file, "r") as input, open(out_file, "w") as output:
+        csvreader = csv.reader(input)
+        csvwriter = csv.writer(output)
+        
+        next(csvreader)
+        for row in csvreader:
+            manufacturer_id = row[0]
+            model_id = row[2]
+            color = row[4].strip()
+            model = row[3].strip()
+            image_url = row[5]
+            fuel_capacity = row[6]
+            filename = car_image_dir + model + " " + color + ".png"
+            print(filename)
+
+            car_image = cv2.imread(filename)
+            _, buffer = cv2.imencode(".png", car_image)
+            image_data = buffer.tobytes()
+            print(filename)
+
+            filename_thumbnail = car_thumbnail_dir + model + " " + color + " Thumbnail.png"
+            car_thumnail = cv2.imread(filename_thumbnail)
+            _, buffer_thumb = cv2.imencode(".png", car_thumnail)
+            thumb_data = buffer_thumb.tobytes()
+            print(filename_thumbnail)
+            row.append(str(psycopg2.Binary(image_data)))
+            row.append(str(psycopg2.Binary(thumb_data)))
+            csvwriter.writerow(row)
+              
+                    
+           
 if __name__ == '__main__':
-    update_model_color('./update_car_image/car_images_resized', './update_car_image/car_thumbnail', './update_car_image/output.txt')
+    insert_new_model_color('./Hyundai_Custin/colors.csv',  './Hyundai_Custin/output.csv', './Hyundai_Custin/images/', './Hyundai_Custin/thumbnails/')
+    # update_model_color('./update_car_image/car_images_resized', './update_car_image/car_thumbnail', './update_car_image/output.txt')
     # insert_new_model_color('./Crawl_xe_prod.csv','./result_insert_prod.csv', './car_images_resized_png/', './car_thumbnail_png/')
 
     # for r, d, f in os.walk('./car_images_resized_png'):
@@ -117,3 +149,4 @@ if __name__ == '__main__':
     #                 print(model_name)
     #             except Exception as e:
     #                 print(e)
+
