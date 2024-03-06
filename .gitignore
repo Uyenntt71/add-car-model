@@ -7,3 +7,9 @@ database.ini
 
 __pycache__/
 *.png
+*.jpg
+*.jpeg
+
+dist/
+build/
+*.spec
